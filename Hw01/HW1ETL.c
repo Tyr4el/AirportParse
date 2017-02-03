@@ -91,16 +91,16 @@ int main(int argc, char **argv)
 
 		int length = index;
 
-		printf("SITE NUMBER   LOC ID         FIELD NAME\t\t   CITY   STATE   LATITUDE\t LONGITUDE\tCONTROL TOWER\n");
+		printf("SITE NUMBER   LOC ID         FIELD NAME\t\t   CITY\t\t  STATE   LATITUDE\tLONGITUDE\t\tCONTROL TOWER\n");
 
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index++];
-			printf("|%-10s|", airport->siteNumber);
-			printf("%10s|", airport->LocID);
-			printf("%25s|", airport->fieldName);
-			printf("%8s|", airport->city);
-			printf("%5s|", airport->state);
+			printf("|%-12s|", airport->siteNumber);
+			printf("%6s|", airport->LocID);
+			printf("%28s|", airport->fieldName);
+			printf("%15s|", airport->city);
+			printf("%4s|", airport->state);
 			printf("%14s|", airport->latitude);
 			printf("%14s|", airport->longitude);
 
