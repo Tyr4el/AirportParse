@@ -6,6 +6,8 @@
 #define BUFFER_SIZE 1024
 #define MAX_AIRPORTS 1000
 
+void my_strtok(char **buffer, char delimiter, char* destination);
+
 int main(int argc, char **argv)
 {
 
@@ -43,6 +45,7 @@ int main(int argc, char **argv)
 
 		airPData airports[MAX_AIRPORTS];
 		int index = 0;
+		char *controlTower = malloc(sizeof(char) * 2);
 		
 		while ((fgets(buffer, sizeof(buffer), file)) != NULL)
 		{
@@ -60,33 +63,24 @@ int main(int argc, char **argv)
 			/* token is just one part of the string *
 			* strtok splits the string put into it by the delimiter
 			* which in this case is a comma */
-			token = strtok(buffer, delimiter);		// Get Site Number
-			strcpy(airport->siteNumber, token);		// Save Site Number				
-			token = strtok(NULL, delimiter);		// Get Location ID
-			strcpy(airport->LocID, token);			// Save Location ID
-			token = strtok(NULL, delimiter);		// Get Field Name
-			strcpy(airport->fieldName, token);		// Save Field Name (Airport Name in PDF)
-			token = strtok(NULL, delimiter);		// Get City
-			strcpy(airport->city, token);			// Save City
-			token = strtok(NULL, delimiter);		// Get State
-			strcpy(airport->state, token);			// Save State
-			token = strtok(NULL, delimiter);		// Get Region
-			token = strtok(NULL, delimiter);		// Get ADO
-			token = strtok(NULL, delimiter);		// Get Use
-			token = strtok(NULL, delimiter);		// Get Latitude
-			strcpy(airport->latitude, token);		// Save Latitude
-			token = strtok(NULL, delimiter);		// Get Longitude
-			strcpy(airport->longitude, token);		// Save Longitude
-			token = strtok(NULL, delimiter);		// Get Airport Ownership
-			token = strtok(NULL, delimiter);		// Get Part 139
-			token = strtok(NULL, delimiter);		// Get NPIAS
-			token = strtok(NULL, delimiter);		// Get NPIAS Hub Type
-			token = strtok(NULL, delimiter);		// Get Control Tower
-			airport->controlTower = token[0];		// Save Control Tower
-			token = strtok(NULL, delimiter);		// Get Fuel
-			token = strtok(NULL, delimiter);		// Get Other Services
-			token = strtok(NULL, delimiter);		// Get Based Aircraft Total
-			token = strtok(NULL, delimiter);		// Get Total Operations
+			char *bufferPtr = buffer;
+
+			my_strtok(&bufferPtr, ',', airport->siteNumber);		// Get and Save Site Number
+			my_strtok(&bufferPtr, ',', airport->LocID);				// Get and Save Location ID
+			my_strtok(&bufferPtr, ',', airport->fieldName);			// Get and Save Field Name
+			my_strtok(&bufferPtr, ',', airport->city);				// Get and Save City
+			my_strtok(&bufferPtr, ',', airport->state);				// Get and Save State
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', airport->latitude);			// Get and Save Latitude
+			my_strtok(&bufferPtr, ',', airport->longitude);			// Get and Save Longitude
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP
+			my_strtok(&bufferPtr, ',', controlTower);				// Get and Save Control Tower
+			airport->controlTower = controlTower[0];				
 		}
 
 		int length = index;
@@ -103,16 +97,6 @@ int main(int argc, char **argv)
 			printf("%4s|", airport->state);
 			printf("%14s|", airport->latitude);
 			printf("%14s|", airport->longitude);
-
-			if (airport->controlTower == 0)
-			{
-				airport->controlTower = "N";
-			}
-			else
-			{
-				airport->controlTower = "Y";
-			}
-
 			printf("%15c|", airport->controlTower);
 			printf("\n");
 		}
@@ -134,4 +118,15 @@ int main(int argc, char **argv)
 
 	fclose(file); // Don't forget to close!
 	return 0;
+}
+
+void my_strtok(char **buffer, char delimiter, char* destination)
+{
+	char *end = strchr(*buffer, delimiter);
+	if (destination != NULL)
+	{
+		memcpy(destination, *buffer, (end - *buffer));
+		destination[end - *buffer] = 0;
+	}
+	*buffer = end + 1;
 }
