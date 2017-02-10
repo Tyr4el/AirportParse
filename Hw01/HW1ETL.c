@@ -3,14 +3,13 @@
 #include <string.h>
 #include "airPData.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1024 // Define a buffer size for the airports
 #define MAX_AIRPORTS 1000
 
 void my_strtok(char **buffer, char delimiter, char* destination);
 
 int main(int argc, char **argv)
 {
-
 	// *fname = argv[1] - Char pointer to fname gets the second argument
 	// variable.  First being the program itself.
 	char *fname = argv[1];
@@ -44,12 +43,14 @@ int main(int argc, char **argv)
 		printf("File opened successfully.\n\n");
 
 		airPData airports[MAX_AIRPORTS];
+		int count = 0;
 		int index = 0;
 		char *controlTower = malloc(sizeof(char) * 2);
 		
-		while ((fgets(buffer, sizeof(buffer), file)) != NULL)
+		while ((fgets(buffer, sizeof(buffer), file)) != NULL) // Read the lines of the csv file
 		{
-			airPData *airport = &airports[index++];
+			count += 1;
+			airPData *airport = &airports[index++]; // Create an array of airPData structs to be able to store the data
 
 			airport->siteNumber = malloc(sizeof(char) * (10 + 1));
 			airport->LocID = malloc(sizeof(char) * (4 + 1));
@@ -85,21 +86,22 @@ int main(int argc, char **argv)
 
 		int length = index;
 
-		printf(" SITE NUMBER\t LOC ID\t\t     FIELD NAME\t\t     CITY       STATE    LATITUDE      LONGITUDE     CONTROL TOWER\n");
+		printf(" SITE NUMBER\t LOC ID\t\t\t\tFIELD NAME\t\t\t\tCITY\t\t\t\t STATE    LATITUDE      LONGITUDE     CONTROL TOWER\n");
 
 		for (index = 0; index < length; index++)
 		{
-			airPData *airport = &airports[index++];
+			airPData *airport = &airports[index];
 			printf("|%-12s|", airport->siteNumber);
 			printf("%12s|", airport->LocID);
-			printf("%42s|", airport->fieldName);
-			printf("%26s|", airport->city);
+			printf("%44s|", airport->fieldName);
+			printf("%40s|", airport->city);
 			printf("%4s|", airport->state);
 			printf("%14s|", airport->latitude);
 			printf("%14s|", airport->longitude);
 			printf("%15c|", airport->controlTower);
 			printf("\n");
 		}
+		printf("The total airport count was: %d\n", count);
 
 		// FREEEEEEDOOOOOMMMMMMMM!!!
 		for (index = 0; index < length; index++)
@@ -122,11 +124,13 @@ int main(int argc, char **argv)
 
 void my_strtok(char **buffer, char delimiter, char* destination)
 {
-	char *end = strchr(*buffer, delimiter);
+	// Search through the buffer and return a pointer to the first occurence of the delim
+	// in the buffer
+	char *end = strchr(*buffer, delimiter); 
 	if (destination != NULL)
 	{
-		memcpy(destination, *buffer, (end - *buffer));
+		memcpy(destination, *buffer, (end - *buffer)); // Copy the token using memcpy
 		destination[end - *buffer] = 0;
 	}
-	*buffer = end + 1;
+	*buffer = end + 1; // Advance the buffer to the character after the delimiter
 }
