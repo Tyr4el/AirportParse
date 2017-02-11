@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
 			airport->siteNumber = malloc(sizeof(char) * (10 + 1));
 			airport->LocID = malloc(sizeof(char) * (4 + 1));
-			airport->fieldName = malloc(sizeof(char) * (30 + 1));
+			airport->fieldName = malloc(sizeof(char) * (60 + 1));
 			airport->city = malloc(sizeof(char) * (27 + 1));
 			airport->state = malloc(sizeof(char) * (2 + 1));
 			airport->latitude = malloc(sizeof(char) * (15 + 1));
@@ -86,14 +86,14 @@ int main(int argc, char **argv)
 
 		int length = index;
 
-		printf(" SITE NUMBER\t LOC ID\t\t\t\tFIELD NAME\t\t\t\tCITY\t\t\t\t STATE    LATITUDE      LONGITUDE     CONTROL TOWER\n");
+		printf(" SITE NUMBER\t LOC ID\t\t\t\tFIELD NAME\t\t\t\t\t\tCITY\t\t    STATE    LATITUDE      LONGITUDE     CONTROL TOWER\n");
 
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index];
 			printf("|%-12s|", airport->siteNumber);
 			printf("%12s|", airport->LocID);
-			printf("%44s|", airport->fieldName);
+			printf("%55s|", airport->fieldName);
 			printf("%40s|", airport->city);
 			printf("%4s|", airport->state);
 			printf("%14s|", airport->latitude);
