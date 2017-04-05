@@ -5,8 +5,10 @@
 
 #define BUFFER_SIZE 1024 // Define a buffer size for the airports
 #define MAX_AIRPORTS 1000
+#define LOC_BUFFER_SIZE 15
 
 void my_strtok(char **buffer, char delimiter, char* destination);
+float sexag2decimal(char *degreeString);
 
 int main(int argc, char **argv)
 {
@@ -52,10 +54,10 @@ int main(int argc, char **argv)
 			count += 1;
 			airPData *airport = &airports[index++]; // Create an array of airPData structs to be able to store the data
 
-			airport->siteNumber = malloc(sizeof(char) * (10 + 1));
+			airport->siteNumber = malloc(sizeof(char) * (13 + 1));
 			airport->LocID = malloc(sizeof(char) * (4 + 1));
 			airport->fieldName = malloc(sizeof(char) * (60 + 1));
-			airport->city = malloc(sizeof(char) * (27 + 1));
+			airport->city = malloc(sizeof(char) * (35 + 1));
 			airport->state = malloc(sizeof(char) * (2 + 1));
 			airport->latitude = malloc(sizeof(char) * (15 + 1));
 			airport->longitude = malloc(sizeof(char) * (15 + 1));
@@ -118,7 +120,11 @@ int main(int argc, char **argv)
 		
 	}
 
+	
 	fclose(file); // Don't forget to close!
+
+	sexag2decimal("28-56-38.0156N"); // Testing of sexag2decimal function
+
 	return 0;
 }
 
@@ -133,4 +139,54 @@ void my_strtok(char **buffer, char delimiter, char* destination)
 		destination[end - *buffer] = 0;
 	}
 	*buffer = end + 1; // Advance the buffer to the character after the delimiter
+}
+
+float sexag2decimal(char *degreeString)
+{
+	// Check if degreeString is NULL
+	if (degreeString == NULL)
+	{
+		return 0.0;
+	}
+
+	char *ddStr = strtok(degreeString, "-");
+	if (ddStr == NULL)
+	{
+		return 0.0;
+	}
+	int dd = atoi(ddStr); // Degrees
+	
+	char *mmStr = strtok(NULL, "-");
+	if (mmStr == NULL)
+	{
+		return 0.0;
+	}
+	int mm = atoi(mmStr); // Minutes
+
+	char *ssStr = strtok(NULL, ".");
+	if (ssStr == NULL)
+	{
+		return 0.0;
+	}
+	int ss = atoi(ssStr); // Seconds
+
+	char *masDStr = strtok(NULL, "");
+	char direction;
+	if (masDStr == NULL)
+	{
+		return 0.0;
+	}
+	int mas = atoi(masDStr); // Milli-Arc Seconds
+
+	if (strlen(masDStr) == 5)
+	{
+		direction = masDStr[4]; // Direction
+	} 
+	else
+	{
+		fprintf(stderr, "Error in MASD string");
+		return 0.0;
+	}
+
+	printf("%d %d %d %d %c", dd, mm, ss, mas, direction);
 }
