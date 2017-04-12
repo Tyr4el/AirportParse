@@ -197,7 +197,6 @@ float sexag2decimal(char *degreeString)
 	} 
 	else
 	{
-		fprintf(stderr, "Error in MASD string");
 		return 0.0;
 	}
 
@@ -223,7 +222,6 @@ float sexag2decimal(char *degreeString)
 
 	if (!(direction == 'N' || direction == 'S' || direction == 'E' || direction == 'W'))
 	{
-		fprintf(stderr, "Invalid direction entered.");
 		return 0.0;
 	}
 	
