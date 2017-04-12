@@ -44,15 +44,13 @@ int main(int argc, char **argv)
 		return 0; // and return 0 to the if
 	}
 	else {
-		printf("File opened successfully.\n\n");
-
 		airPData airports[MAX_AIRPORTS];
-		int count = 0;
 		int index = 0;
+
+		char *latLonBuffer = malloc(sizeof(char) * (15 + 1));
 		
 		while ((fgets(buffer, sizeof(buffer), file)) != NULL) // Read the lines of the csv file
 		{
-			count += 1;
 			airPData *airport = &airports[index++]; // Create an array of airPData structs to be able to store the data
 
 			airport->LocID = malloc(sizeof(char) * (4 + 1));
@@ -72,13 +70,16 @@ int main(int argc, char **argv)
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
-			my_strtok(&bufferPtr, ',', airport->latitude);			// Get and Save Latitude
-			my_strtok(&bufferPtr, ',', airport->longitude);			// Get and Save Longitude
+			my_strtok(&bufferPtr, ',', latLonBuffer);				// Get and Save Latitude
+			airport->latitude = sexag2decimal(latLonBuffer);		// Convert Latitude to decimal
+			my_strtok(&bufferPtr, ',', latLonBuffer);				// Get and Save Longitude
+			airport->longitude = sexag2decimal(latLonBuffer);		// Convert Longitude to decimal
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
-			my_strtok(&bufferPtr, ',', NULL);						// SKIP Control Tower				
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP Control Tower	
+
 		}
 
 		int length = index;
@@ -88,11 +89,11 @@ int main(int argc, char **argv)
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index];
-			printf("%12s|", airport->LocID);
-			printf("%55s|", airport->fieldName);
-			printf("%40s|", airport->city);
-			printf("%14s|", airport->latitude);
-			printf("%14s|", airport->longitude);
+			printf("%s,", airport->LocID);
+			printf("%s,", airport->fieldName);
+			printf("%s,", airport->city);
+			printf("%.4f,", airport->latitude);
+			printf("%.4f", airport->longitude);
 			printf("\n");
 		}
 
@@ -104,20 +105,17 @@ int main(int argc, char **argv)
 			free(airport->fieldName);
 			free(airport->city);
 		}
+
+		free(latLonBuffer); // Free the latlonBuffer just once
 		
 	}
-
-	char myString[50] = { 0 };
-	strcpy(myString, "28-26-08.0210S");
-
-	sexag2decimal(myString); // Testing of sexag2decimal function
 	
 	fclose(file); // Don't forget to close!
 
 	return 0;
 }
 
-void my_strtok(char **buffer, char delimiter, char* destination)
+void my_strtok(char **buffer, char delimiter, char *destination)
 {
 	// Search through the buffer and return a pointer to the first occurence of the delim
 	// in the buffer
@@ -145,7 +143,11 @@ float sexag2decimal(char *degreeString)
 	{
 		return 0.0;
 	}
-	int dd = atoi(ddStr); 
+	int dd = atoi(ddStr);
+	if (dd < 0 || dd > 180) // Check for out of bounds
+	{
+		return 0.0;
+	}
 	// END DEGREES
 
 	// START MINUTES
@@ -155,6 +157,10 @@ float sexag2decimal(char *degreeString)
 		return 0.0;
 	}
 	int mm = atoi(mmStr); // Minutes
+	if (mm < 0 || mm > 59) // Check for out of bounds
+	{
+		return 0.0;
+	}
 	// END MINUTES
 
 	// START SECONDS
@@ -164,6 +170,10 @@ float sexag2decimal(char *degreeString)
 		return 0.0;
 	}
 	int ss = atoi(ssStr); // Seconds
+	if (ss < 0 || ss > 59) // Check for out of bounds
+	{
+		return 0.0;
+	}
 	// END SECONDS
 
 	// START MAS
@@ -174,6 +184,10 @@ float sexag2decimal(char *degreeString)
 		return 0.0;
 	}
 	int mas = atoi(masDStr); // Milli-Arc Seconds
+	if (mas < 0 || mas > 9999) // Check for out of bounds
+	{
+		return 0.0;
+	}
 	// END MAS
 
 	// Check the length of masDStr and get the direction char out of it
@@ -192,8 +206,11 @@ float sexag2decimal(char *degreeString)
 	float mmFinal = mm / 60.0;
 	float ssMasFinal = ssMasCombined / (pow(60.0, 2));
 
+	// Define the result and perform the maths
 	float result = dd + mmFinal + ssMasFinal;
 
+	// Check for directional things
+	// Check to make sure an invalid direction wasn't entered
 	if (direction == 'S')
 	{
 		result = result * -1;
@@ -204,9 +221,12 @@ float sexag2decimal(char *degreeString)
 		result = result * -1;
 	}
 
-	printf("%.4f\n", result);
-	printf("%d %d", ss, mas);
-
+	if (!(direction == 'N' || direction == 'S' || direction == 'E' || direction == 'W'))
+	{
+		fprintf(stderr, "Invalid direction entered.");
+		return 0.0;
+	}
+	
 	// Return
 	return result;
 }
