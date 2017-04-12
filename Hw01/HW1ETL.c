@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "airPData.h"
 
 #define BUFFER_SIZE 1024 // Define a buffer size for the airports
@@ -12,6 +13,7 @@ float sexag2decimal(char *degreeString);
 
 int main(int argc, char **argv)
 {
+
 	// *fname = argv[1] - Char pointer to fname gets the second argument
 	// variable.  First being the program itself.
 	char *fname = argv[1];
@@ -68,11 +70,11 @@ int main(int argc, char **argv)
 			* which in this case is a comma */
 			char *bufferPtr = buffer;
 
-			my_strtok(&bufferPtr, ',', airport->siteNumber);		// Get and Save Site Number
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP Site Number
 			my_strtok(&bufferPtr, ',', airport->LocID);				// Get and Save Location ID
 			my_strtok(&bufferPtr, ',', airport->fieldName);			// Get and Save Field Name
 			my_strtok(&bufferPtr, ',', airport->city);				// Get and Save City
-			my_strtok(&bufferPtr, ',', airport->state);				// Get and Save State
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP State
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
@@ -82,25 +84,25 @@ int main(int argc, char **argv)
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
-			my_strtok(&bufferPtr, ',', controlTower);				// Get and Save Control Tower
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP Control Tower
 			airport->controlTower = controlTower[0];				
 		}
 
 		int length = index;
 
-		printf(" SITE NUMBER\t LOC ID\t\t\t\tFIELD NAME\t\t\t\t\t\tCITY\t\t    STATE    LATITUDE      LONGITUDE     CONTROL TOWER\n");
+		printf("code,name,city,lat,lon\n");
 
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index];
-			printf("|%-12s|", airport->siteNumber);
+			//printf("|%-12s|", airport->siteNumber);
 			printf("%12s|", airport->LocID);
 			printf("%55s|", airport->fieldName);
 			printf("%40s|", airport->city);
-			printf("%4s|", airport->state);
+			//printf("%4s|", airport->state);
 			printf("%14s|", airport->latitude);
 			printf("%14s|", airport->longitude);
-			printf("%15c|", airport->controlTower);
+			//printf("%15c|", airport->controlTower);
 			printf("\n");
 		}
 		printf("The total airport count was: %d\n", count);
@@ -109,21 +111,23 @@ int main(int argc, char **argv)
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index];
-			free(airport->siteNumber);
+			//free(airport->siteNumber);
 			free(airport->LocID);
 			free(airport->fieldName);
 			free(airport->city);
-			free(airport->state);
+			//free(airport->state);
 			free(airport->latitude);
 			free(airport->longitude);
 		}
 		
 	}
 
+	char myString[50] = { 0 };
+	strcpy(myString, "28-26-08.0210N");
+
+	sexag2decimal(myString); // Testing of sexag2decimal function
 	
 	fclose(file); // Don't forget to close!
-
-	sexag2decimal("28-56-38.0156N"); // Testing of sexag2decimal function
 
 	return 0;
 }
@@ -149,27 +153,35 @@ float sexag2decimal(char *degreeString)
 		return 0.0;
 	}
 
+	// START DEGREES
+	// Degrees needs no conversion because it's just a number from 0 to 1880
 	char *ddStr = strtok(degreeString, "-");
 	if (ddStr == NULL)
 	{
 		return 0.0;
 	}
-	int dd = atoi(ddStr); // Degrees
-	
+	int dd = atoi(ddStr); 
+	// END DEGREES
+
+	// START MINUTES
 	char *mmStr = strtok(NULL, "-");
 	if (mmStr == NULL)
 	{
 		return 0.0;
 	}
 	int mm = atoi(mmStr); // Minutes
+	// END MINUTES
 
+	// START SECONDS
 	char *ssStr = strtok(NULL, ".");
 	if (ssStr == NULL)
 	{
 		return 0.0;
 	}
 	int ss = atoi(ssStr); // Seconds
+	// END SECONDS
 
+	// START MAS
 	char *masDStr = strtok(NULL, "");
 	char direction;
 	if (masDStr == NULL)
@@ -177,7 +189,9 @@ float sexag2decimal(char *degreeString)
 		return 0.0;
 	}
 	int mas = atoi(masDStr); // Milli-Arc Seconds
+	// END MAS
 
+	// Check the length of masDStr and get the direction char out of it
 	if (strlen(masDStr) == 5)
 	{
 		direction = masDStr[4]; // Direction
@@ -188,5 +202,16 @@ float sexag2decimal(char *degreeString)
 		return 0.0;
 	}
 
-	printf("%d %d %d %d %c", dd, mm, ss, mas, direction);
+	// Conversions per specs pg 5
+	float ssMasCombined = ss + mas / 1000.0;
+	float mmFinal = mm / 60.0;
+	float ssMasFinal = ssMasCombined / (pow(60.0, 2));
+
+	float result = dd + mmFinal + ssMasFinal;
+
+	printf("%.4f\n", result);
+	printf("%d %d", ss, mas);
+
+	// Return
+	return result;
 }
