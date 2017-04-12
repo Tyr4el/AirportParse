@@ -49,21 +49,15 @@ int main(int argc, char **argv)
 		airPData airports[MAX_AIRPORTS];
 		int count = 0;
 		int index = 0;
-		char *controlTower = malloc(sizeof(char) * 2);
 		
 		while ((fgets(buffer, sizeof(buffer), file)) != NULL) // Read the lines of the csv file
 		{
 			count += 1;
 			airPData *airport = &airports[index++]; // Create an array of airPData structs to be able to store the data
 
-			airport->siteNumber = malloc(sizeof(char) * (13 + 1));
 			airport->LocID = malloc(sizeof(char) * (4 + 1));
 			airport->fieldName = malloc(sizeof(char) * (60 + 1));
 			airport->city = malloc(sizeof(char) * (35 + 1));
-			airport->state = malloc(sizeof(char) * (2 + 1));
-			airport->latitude = malloc(sizeof(char) * (15 + 1));
-			airport->longitude = malloc(sizeof(char) * (15 + 1));
-			airport->controlTower = 0;
 
 			/* token is just one part of the string *
 			* strtok splits the string put into it by the delimiter
@@ -84,8 +78,7 @@ int main(int argc, char **argv)
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
 			my_strtok(&bufferPtr, ',', NULL);						// SKIP
-			my_strtok(&bufferPtr, ',', NULL);						// SKIP Control Tower
-			airport->controlTower = controlTower[0];				
+			my_strtok(&bufferPtr, ',', NULL);						// SKIP Control Tower				
 		}
 
 		int length = index;
@@ -95,35 +88,27 @@ int main(int argc, char **argv)
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index];
-			//printf("|%-12s|", airport->siteNumber);
 			printf("%12s|", airport->LocID);
 			printf("%55s|", airport->fieldName);
 			printf("%40s|", airport->city);
-			//printf("%4s|", airport->state);
 			printf("%14s|", airport->latitude);
 			printf("%14s|", airport->longitude);
-			//printf("%15c|", airport->controlTower);
 			printf("\n");
 		}
-		printf("The total airport count was: %d\n", count);
 
 		// FREEEEEEDOOOOOMMMMMMMM!!!
 		for (index = 0; index < length; index++)
 		{
 			airPData *airport = &airports[index];
-			//free(airport->siteNumber);
 			free(airport->LocID);
 			free(airport->fieldName);
 			free(airport->city);
-			//free(airport->state);
-			free(airport->latitude);
-			free(airport->longitude);
 		}
 		
 	}
 
 	char myString[50] = { 0 };
-	strcpy(myString, "28-26-08.0210N");
+	strcpy(myString, "28-26-08.0210S");
 
 	sexag2decimal(myString); // Testing of sexag2decimal function
 	
@@ -208,6 +193,16 @@ float sexag2decimal(char *degreeString)
 	float ssMasFinal = ssMasCombined / (pow(60.0, 2));
 
 	float result = dd + mmFinal + ssMasFinal;
+
+	if (direction == 'S')
+	{
+		result = result * -1;
+	}
+
+	if (direction == 'W')
+	{
+		result = result * -1;
+	}
 
 	printf("%.4f\n", result);
 	printf("%d %d", ss, mas);
